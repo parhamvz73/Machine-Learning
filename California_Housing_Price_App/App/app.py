@@ -6,16 +6,12 @@ import pandas as pd
 import numpy as np
 import json
 import pickle
-import lightgbm as lgb
 
 # =========================
 # Load artifacts
 # =========================
-bst = lgb.Booster(model_file="housing_model_lgb.txt")
-
-with open("kmeans.pkl", "rb") as f:
-    km = pickle.load(f)
-
+with open("housing_model.pkl", "rb") as f:
+    model = pickle.load(f)
 
 with open("schema.json", "r") as f:
     schema = json.load(f)
@@ -24,33 +20,6 @@ RAW_NUM_COLS = schema["raw_numeric_features"]
 RAW_CAT_COLS = schema["categorical_features"]
 RATIO_COLS   = schema["fe_ratio_cols"]
 CAP_COLS     = schema["fe_cap_cols"]
-
-# =========================
-# Feature Engineering
-# =========================
-def add_ratios(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
-    df["rooms_per_household"] = df["total_rooms"] / df["households"].replace(0, np.nan)
-    df["bedrooms_ratio"] = df["total_bedrooms"] / df["total_rooms"].replace(0, np.nan)
-    df["population_per_household"] = df["population"] / df["households"].replace(0, np.nan)
-    return df.replace([np.inf, -np.inf], np.nan)
-
-def add_caps(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
-    df["is_age_capped"] = (df["housing_median_age"] == 52).astype(int)
-    df["is_income_capped"] = (df["median_income"] == 15.0001).astype(int)
-    return df
-
-def preprocess(df: pd.DataFrame) -> pd.DataFrame:
-    df = add_ratios(add_caps(df))
-    df["region_cluster"] = km.predict(df[["longitude","latitude"]])
-
-    # one-hot encode categorical cols
-    df = pd.get_dummies(df, columns=["ocean_proximity","region_cluster"])
-
-    # align with model features
-    df = df.reindex(columns=bst.feature_name(), fill_value=0)
-    return df
 
 # =========================
 # Streamlit UI
@@ -86,6 +55,6 @@ if submitted:
         "ocean_proximity": ocean_proximity
     }])
 
-    features = preprocess(raw)
-    pred = bst.predict(features)[0]
+    # The pipeline already handles preprocessing
+    pred = model.predict(raw)[0]
     st.success(f"🏡 Predicted House Price: ${pred:,.0f}")
