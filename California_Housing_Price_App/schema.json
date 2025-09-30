@@ -1,0 +1,1 @@
+{"raw_numeric_features": ["longitude", "latitude", "housing_median_age", "total_rooms", "total_bedrooms", "population", "households", "median_income"], "categorical_features": ["ocean_proximity"], "fe_ratio_cols": ["rooms_per_household", "bedrooms_ratio", "population_per_household"], "fe_cap_cols": ["is_age_capped", "is_income_capped"], "fe_cluster_col": "region_cluster"}
