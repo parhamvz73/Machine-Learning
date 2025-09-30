@@ -5,14 +5,18 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import json
-import joblib
 import lightgbm as lgb
 
 # =========================
 # Load artifacts
 # =========================
 bst = lgb.Booster(model_file="housing_model_lgb.txt")
-km = joblib.load("kmeans.pkl")
+import pickle
+
+# instead of: km = joblib.load("kmeans.pkl")
+with open("kmeans.pkl", "rb") as f:
+    km = pickle.load(f)
+
 
 with open("schema.json", "r") as f:
     schema = json.load(f)
@@ -86,3 +90,4 @@ if submitted:
     features = preprocess(raw)
     pred = bst.predict(features)[0]
     st.success(f"🏡 Predicted House Price: ${pred:,.0f}")
+
