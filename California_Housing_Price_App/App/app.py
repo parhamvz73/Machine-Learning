@@ -5,8 +5,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import json
-import lightgbm as lgb
-
 # =========================
 # Load artifacts
 # =========================
@@ -90,4 +88,5 @@ if submitted:
     features = preprocess(raw)
     pred = bst.predict(features)[0]
     st.success(f"🏡 Predicted House Price: ${pred:,.0f}")
+
 
